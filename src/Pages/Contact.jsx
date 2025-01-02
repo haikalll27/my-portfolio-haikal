@@ -136,6 +136,7 @@ const ContactPage = () => {
             <form 
               action="https://formsubmit.co/muhammadhaikalsch@gmail.com"
               method="POST"
+              target="_blank"
               onSubmit={handleSubmit}
               className="space-y-6"
             >
