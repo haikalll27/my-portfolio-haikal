@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Share2, User, Mail, MessageSquare, Send } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Phone } from 'lucide-react';
 import SocialLinks from "../components/SocialLinks";
 import Komentar from "../components/Commentar";
 import Swal from "sweetalert2";
@@ -11,6 +12,7 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",  // Menambahkan state untuk nomor telepon
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +66,7 @@ const ContactPage = () => {
       setFormData({
         name: "",
         email: "",
+        phone: "",  // Reset nomor telepon juga
         message: "",
       });
     } catch (error) {
@@ -139,6 +142,8 @@ const ContactPage = () => {
               {/* FormSubmit Configuration */}
               <input type="hidden" name="_template" value="table" />
               <input type="hidden" name="_captcha" value="false" />
+              {/* <input type="hidden" name="_next" value="https://my-portfolio-haikal.vercel.app/" /> */}
+
 
               <div
                 data-aos="fade-up"
@@ -157,6 +162,7 @@ const ContactPage = () => {
                   required
                 />
               </div>
+
               <div
                 data-aos="fade-up"
                 data-aos-delay="200"
@@ -174,9 +180,28 @@ const ContactPage = () => {
                   required
                 />
               </div>
+
+              {/* Input untuk Nomor Telepon */}
               <div
                 data-aos="fade-up"
                 data-aos-delay="300"
+                className="relative group"
+              >
+                <Phone className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-[#6366f1] transition-colors" />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Your Phone Number"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className="w-full p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 transition-all duration-300 hover:border-[#6366f1]/30 disabled:opacity-50"
+                />
+              </div>
+
+              <div
+                data-aos="fade-up"
+                data-aos-delay="400"
                 className="relative group"
               >
                 <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-[#6366f1] transition-colors" />
@@ -190,9 +215,10 @@ const ContactPage = () => {
                   required
                 />
               </div>
+
               <button
                 data-aos="fade-up"
-                data-aos-delay="400"
+                data-aos-delay="500"
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#6366f1]/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"

@@ -190,25 +190,24 @@ const Komentar = () => {
             once: false,
             duration: 1000,
         });
-
-        // Load comments from localStorage if available
-        const storedComments = JSON.parse(localStorage.getItem('comments')) || [];
-        setComments(storedComments);
     }, []);
 
     const formatDate = useCallback((timestamp) => {
         if (!timestamp) return '';
-        const date = timestamp.toDate();
+        
+        // Check if the timestamp is a Firestore Timestamp and convert it if necessary
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        
         const now = new Date();
         const diffMinutes = Math.floor((now - date) / (1000 * 60));
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
-
+    
         if (diffMinutes < 1) return 'Just now';
         if (diffMinutes < 60) return `${diffMinutes}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
-
+    
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'short',
@@ -216,53 +215,59 @@ const Komentar = () => {
         }).format(date);
     }, []);
 
+    // const formatDate = useCallback((timestamp) => {
+    //     if (!timestamp) return '';
+    //     const date = timestamp.toDate();
+    //     const now = new Date();
+    //     const diffMinutes = Math.floor((now - date) / (1000 * 60));
+    //     const diffHours = Math.floor(diffMinutes / 60);
+    //     const diffDays = Math.floor(diffHours / 24);
+
+    //     if (diffMinutes < 1) return 'Just now';
+    //     if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    //     if (diffHours < 24) return `${diffHours}h ago`;
+    //     if (diffDays < 7) return `${diffDays}d ago`;
+
+    //     return new Intl.DateTimeFormat('en-US', {
+    //         year: 'numeric',
+    //         month: 'short',
+    //         day: 'numeric',
+    //     }).format(date);
+    // }, []);
+
     const handleCommentSubmit = useCallback(async ({ newComment, userName, imageFile }) => {
         setError('');
         setIsSubmitting(true);
 
         try {
-            // Store the comment in localStorage
+            // Create the new comment object
             const newCommentData = {
                 content: newComment,
                 userName,
                 profileImage: imageFile ? URL.createObjectURL(imageFile) : null,
                 createdAt: new Date(),
             };
+            
+            // Simulate saving the comment (in practice, you would save it to a server or database)
+            setComments((prevComments) => [...prevComments, newCommentData]);
 
-            // Retrieve existing comments from localStorage
-            const storedComments = JSON.parse(localStorage.getItem('comments')) || [];
-
-            // Add the new comment to the array
-            const updatedComments = [newCommentData, ...storedComments];
-
-            // Save the updated comments back to localStorage
-            localStorage.setItem('comments', JSON.stringify(updatedComments));
-
-            // Update the state
-            setComments(updatedComments);
-        } catch (error) {
-            setError('Failed to post comment. Please try again.');
-            console.error('Error adding comment: ', error);
-        } finally {
+            setIsSubmitting(false);
+        } catch (err) {
+            setError('Failed to post comment. Please try again later.');
             setIsSubmitting(false);
         }
     }, []);
 
     return (
-        <div className="container mx-auto px-4 py-8 space-y-10">
-            <h2 className="text-2xl font-semibold text-white">Comments</h2>
-            {error && (
-                <div className="text-red-400">{error}</div>
-            )}
-            <div className="space-y-4">
+        <div className="space-y-10">
+            <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-white">Komentar</h3>
                 <CommentForm onSubmit={handleCommentSubmit} isSubmitting={isSubmitting} error={error} />
             </div>
+
             <div className="space-y-4">
                 {comments.length === 0 ? (
-                    <div className="text-center py-8">
-                        <UserCircle2 className="w-12 h-12 text-indigo-400 mx-auto mb-3 opacity-50" />
-                        <p className="text-gray-400">No comments yet. Start the conversation!</p>
-                    </div>
+                    <p className="text-center text-gray-400">No comments yet.</p>
                 ) : (
                     comments.map((comment, index) => (
                         <Comment key={index} comment={comment} formatDate={formatDate} index={index} />
@@ -272,6 +277,5 @@ const Komentar = () => {
         </div>
     );
 };
-
 
 export default Komentar;
