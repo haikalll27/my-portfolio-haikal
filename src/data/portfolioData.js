@@ -135,9 +135,9 @@ export const portfolioTechStacks = [
   { icon: "/php.svg", language: "PHP" },
   { icon: "/laravel.svg", language: "Laravel" },
   { icon: "/reactjs.svg", language: "ReactJS" },
-  { icon: "/vite.svg", language: "Vite" },
+  { icon: "/vuejs.svg", language: "Vue Js" },
+  { icon: "/nextjs.svg", language: "Next Js" },
   { icon: "/MUI.svg", language: "Material UI" },
-  { icon: "/vercel.svg", language: "Vercel" },
   { icon: "/git.svg", language: "Git" },
 ];
 
