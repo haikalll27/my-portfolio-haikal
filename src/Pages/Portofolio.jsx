@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
@@ -13,6 +12,12 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import Certificate from "../components/Certificate";
 import { Code, Award, Boxes } from "lucide-react";
+import {
+  portfolioCertificates,
+  portfolioProjects,
+  portfolioTechStacks,
+  syncPortfolioStorage,
+} from "../data/portfolioData";
 
 // Separate ShowMore/ShowLess button component
 const ToggleButton = ({ onClick, isShowingMore }) => (
@@ -63,6 +68,30 @@ const ToggleButton = ({ onClick, isShowingMore }) => (
   </button>
 );
 
+const CountLabel = ({ label, count }) => (
+  <span className="flex items-center gap-2">
+    <span>{label}</span>
+    {/* <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-xs text-slate-200">
+      {count}
+    </span> */}
+  </span>
+);
+
+const PaginationButton = ({ children, isActive = false, disabled = false, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={`flex h-10 min-w-10 items-center justify-center rounded-xl border px-3 text-sm font-medium transition-all duration-300 ${
+      isActive
+        ? "border-purple-400/60 bg-gradient-to-r from-[#6366f1]/30 to-[#a855f7]/30 text-white shadow-lg shadow-purple-500/10"
+        : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
+    } ${disabled ? "cursor-not-allowed opacity-40 hover:border-white/10 hover:bg-white/5 hover:text-slate-300" : ""}`}
+  >
+    {children}
+  </button>
+);
+
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div
@@ -73,9 +102,7 @@ function TabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: { xs: 1, sm: 3 } }}>
-          <Typography>{children}</Typography>
-        </Box>
+        <Box sx={{ p: { xs: 1, sm: 3 } }}>{children}</Box>
       )}
     </div>
   );
@@ -94,188 +121,91 @@ function a11yProps(index) {
   };
 }
 
-const staticProjects = [
-  {
-    id: 1,
-    Img: "/portofolio-hd.png",
-    Title: "Fullstack Web Developer",
-    Name: "Homedevs",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP) | MySQL",
-    Link: "https://homedevs.id",
-  },
-  {
-    id: 2,
-    Img: "/portofolio-fan.png",
-    Title: "Fullstack Web Developer",
-    Name: "Faust Aegis Network",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP) | MySQL",
-    Link: "https://homedevs.id/fan",
-  },
-  {
-    id: 3,
-    Img: "/portofolio-silancar.png",
-    Title: "Backtend Web Developer",
-    Name: "Silancar Nakertranskonut",
-    Description: "Laravel (PHP) | MySQL",
-    Link: "https://silancar-nakertranskonut.id",
-  },
-  {
-    id: 4,
-    Img: "/portofolio-icas.png",
-    Title: "Backtend Web Developer",
-    Name: "INTERNATIONAL CONFERENCE ON APPLIED SCIENCE 2024",
-    Description: "Laravel (PHP) | MySQL",
-    Link: "https://icassvipb.com",
-  },
-  {
-    id: 5,
-    Img: "/portofolio-labella.png",
-    Title: "Frontend Web Developer",
-    Name: "Labella Online Strore",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP)",
-    Link: "https://www.labellaonlinestore.com",
-  },
-  {
-    id: 6,
-    Img: "/portofolio-gri-beef.png",
-    Title: "Frontend Web Developer",
-    Name: "Giri Beef Nusantara",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP)",
-    Link: "https://giribeefnusantara.id",
-  },
-  {
-    id: 7,
-    Img: "/portofolio-sneakers.png",
-    Title: "Frontend Web Developer",
-    Name: "Naira Sneakers",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP)",
-    Link: "#",
-  },
-  {
-    id: 8,
-    Img: "/portofolio-dipinus.png",
-    Title: "Backtend Web Developer",
-    Name: "Dipinus",
-    Description: "Laravel (PHP) | MySQL",
-    Link: "https://app.dipinus.codepower.site",
-  },
-  {
-    id: 9,
-    Img: "/portofolio-ptksn.png",
-    Title: "Frontend Web Developer",
-    Name: "PT KSN",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP)",
-    Link: "#",
-  },
-  {
-    id: 10,
-    Img: "/portofolio-njy.png",
-    Title: "Fullstack Web Developer",
-    Name: "Nata Jaya Electro",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP) | MySQL",
-    Link: "https://www.natajayaelektro.com",
-  },
-  {
-    id: 11,
-    Img: "/portofolio-bpskljawa.png",
-    Title: "Fullstack Web Developer",
-    Name: "BPSKL Jawa",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP) | MySQL",
-    Link: "https://bpskljawa.codepower.site",
-  },
-  {
-    id: 12,
-    Img: "/portofolio-destinasi.png",
-    Title: "Fullstack Web Developer",
-    Name: "Wisata Alam",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP) | MySQL",
-    Link: "#",
-  },
-  {
-    id: 13,
-    Img: "/portofolio-bakul.png",
-    Title: "Frontend Web Developer",
-    Name: "Beasiswa Kuliah (Bakul)",
-    Description: "HTML | CSS | JS | Bootstrap | Laravel (PHP)",
-    Link: "#",
-  },
-];
-
-const staticCertificates = [
-  {
-    id: 1,
-    Img: "/sertifikas-dicoding-haikal-1.png",
-  },
-  {
-    id: 2,
-    Img: "/sertifikas-dicoding-haikal-2.png",
-  },
-];
-
-const techStacks = [
-  { icon: "html.svg", language: "HTML" },
-  { icon: "css.svg", language: "CSS" },
-  { icon: "javascript.svg", language: "JavaScript" },
-  { icon: "tailwind.svg", language: "Tailwind CSS" },
-  { icon: "bootstrap.svg", language: "Bootstrap" },
-  { icon: "php.svg", language: "PHP" },
-  { icon: "laravel.svg", language: "Laravel" },
-  { icon: "reactjs.svg", language: "ReactJS" },
-  { icon: "vite.svg", language: "Vite" },
-  { icon: "MUI.svg", language: "Material UI" },
-  { icon: "vercel.svg", language: "Vercel" },
-  { icon: "git.svg", language: "Git" },
-    // { icon: "nodejs.svg", language: "Node JS" },
-  // { icon: "firebase.svg", language: "Firebase" },
-];
-
 export default function FullWidthTabs() {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const [projects, setProjects] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
-  const isMobile = window.innerWidth < 768;
-  const initialItems = isMobile ? 4 : 6;
+  const [currentProjectPage, setCurrentProjectPage] = useState(1);
+  const [screenWidth, setScreenWidth] = useState(() =>
+    typeof window === "undefined" ? 1280 : window.innerWidth
+  );
+  const previousProjectPage = useRef(currentProjectPage);
+  const projectItemsPerPage = 6;
+
+  const initialItems = useMemo(() => {
+    if (screenWidth < 640) return 4;
+    if (screenWidth < 1024) return 6;
+    return 8;
+  }, [screenWidth]);
 
   useEffect(() => {
-    // Initialize AOS once
+    syncPortfolioStorage();
     AOS.init({
-      once: false, // This will make animations occur only once
+      once: false,
     });
-  }, []);
 
-  const fetchData = useCallback(async () => {
-    try {
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }, []);
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+      AOS.refresh();
+    };
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   const toggleShowMore = useCallback((type) => {
-    if (type === 'projects') {
-      setShowAllProjects(prev => !prev);
-    } else {
+    if (type !== 'projects') {
       setShowAllCertificates(prev => !prev);
     }
   }, []);
 
-  const displayedProjects = showAllProjects ? projects : projects.slice(0, initialItems);
-  const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, initialItems);
+  const totalProjectPages = Math.ceil(portfolioProjects.length / projectItemsPerPage);
+  const displayedProjects = useMemo(() => {
+    const startIndex = (currentProjectPage - 1) * projectItemsPerPage;
+    return portfolioProjects.slice(startIndex, startIndex + projectItemsPerPage);
+  }, [currentProjectPage]);
+  const displayedCertificates = showAllCertificates
+    ? portfolioCertificates
+    : portfolioCertificates.slice(0, initialItems);
+  const visiblePageNumbers = useMemo(() => {
+    if (totalProjectPages <= 3) {
+      return Array.from({ length: totalProjectPages }, (_, index) => index + 1);
+    }
+
+    if (screenWidth < 640) {
+      if (currentProjectPage === 1) return [1, 2, 3];
+      if (currentProjectPage === totalProjectPages) {
+        return [totalProjectPages - 2, totalProjectPages - 1, totalProjectPages];
+      }
+      return [currentProjectPage - 1, currentProjectPage, currentProjectPage + 1];
+    }
+
+    return Array.from({ length: totalProjectPages }, (_, index) => index + 1);
+  }, [currentProjectPage, screenWidth, totalProjectPages]);
+
+  useEffect(() => {
+    if (currentProjectPage > totalProjectPages) {
+      setCurrentProjectPage(totalProjectPages || 1);
+    }
+  }, [currentProjectPage, totalProjectPages]);
+
+  useEffect(() => {
+    if (value === 0 && previousProjectPage.current !== currentProjectPage) {
+      const portfolioSection = document.getElementById("Portofolio");
+      portfolioSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    previousProjectPage.current = currentProjectPage;
+  }, [currentProjectPage, value]);
 
   return (
-    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Portofolio">
+    <div className="w-full overflow-hidden bg-[#030014] px-[5%] pt-16 sm:pt-20 lg:px-[10%]" id="Portofolio">
       {/* Header section */}
-      <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
+      <div className="pb-10 text-center" data-aos="fade-up" data-aos-duration="1000">
         <div className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
           <span style={{
             color: '#6366f1',
@@ -291,10 +221,20 @@ export default function FullWidthTabs() {
           Explore my journey through projects, certifications, and technical expertise.
           Each section represents a milestone in my continuous learning path.
         </div>
-    </div>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-slate-300">
+          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            {portfolioProjects.length} Projects
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            {portfolioCertificates.length} Certificates
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            {portfolioTechStacks.length} Tech Stack
+          </span>
+        </div>
+      </div>
 
       <Box sx={{ width: "100%" }}>
-        {/* AppBar and Tabs section - unchanged */}
         <AppBar
           position="static"
           elevation={0}
@@ -316,28 +256,31 @@ export default function FullWidthTabs() {
               zIndex: 0,
             },
           }}
-          className="md:px-4"
+          className="px-2 md:px-4"
         >
-          {/* Tabs remain unchanged */}
           <Tabs
             value={value}
             onChange={handleChange}
             textColor="secondary"
             indicatorColor="secondary"
-            variant="fullWidth"
+            variant={screenWidth < 640 ? "scrollable" : "fullWidth"}
+            scrollButtons={screenWidth < 640}
+            allowScrollButtonsMobile
             sx={{
-              // Existing styles remain unchanged
-              minHeight: "70px",
+              minHeight: { xs: "64px", md: "70px" },
               "& .MuiTab-root": {
-                fontSize: { xs: "0.9rem", md: "1rem" },
+                minHeight: { xs: "56px", md: "70px" },
+                minWidth: { xs: "160px", sm: "unset" },
+                fontSize: { xs: "0.8rem", md: "1rem" },
                 fontWeight: "600",
                 color: "#94a3b8",
                 textTransform: "none",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                padding: "20px 0",
+                padding: "14px 0",
                 zIndex: 1,
-                margin: "8px",
+                margin: "6px",
                 borderRadius: "12px",
+                gap: "6px",
                 "&:hover": {
                   color: "#ffffff",
                   backgroundColor: "rgba(139, 92, 246, 0.1)",
@@ -361,21 +304,24 @@ export default function FullWidthTabs() {
               "& .MuiTabs-flexContainer": {
                 gap: "8px",
               },
+              "& .MuiTabs-scrollButtons": {
+                color: "#cbd5e1",
+              },
             }}
           >
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Projects"
+              label={<CountLabel label="Projects" count={portfolioProjects.length} />}
               {...a11yProps(0)}
             />
             <Tab
               icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Certificates"
+              label={<CountLabel label="Certificates" count={portfolioCertificates.length} />}
               {...a11yProps(1)}
             />
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Tech Stack"
+              label={<CountLabel label="Tech Stack" count={portfolioTechStacks.length} />}
               {...a11yProps(2)}
             />
           </Tabs>
@@ -387,33 +333,61 @@ export default function FullWidthTabs() {
           onChangeIndex={setValue}
         >
           <TabPanel value={value} index={0} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                  {staticProjects.map((project, index) => (
-                    <div className="w-ful h-[100%] rounded-lg overflow-hidden" key={project.id} data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"} data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}>
+            <div className="container mx-auto flex items-center justify-center overflow-hidden">
+              <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+                  {displayedProjects.map((project, index) => (
+                    <div className="h-full rounded-lg overflow-hidden" key={project.id} data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"} data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}>
                       <CardProject Img={project.Img} Title={project.Title} Name={project.Name} Description={project.Description} Link={project.Link} id={project.id} />
                     </div>
                   ))}
               </div>
             </div>
-            {projects.length > initialItems && (
-              <div className="mt-6 w-full flex justify-start">
-                <ToggleButton
-                  onClick={() => toggleShowMore('projects')}
-                  isShowingMore={showAllProjects}
-                />
+            {totalProjectPages > 1 && (
+              <div className="mt-8 flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:justify-between">
+                <div className="text-center text-sm text-slate-400 sm:text-left">
+                  Menampilkan {displayedProjects.length} dari {portfolioProjects.length} project
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <PaginationButton
+                    onClick={() => setCurrentProjectPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentProjectPage === 1}
+                  >
+                    Prev
+                  </PaginationButton>
+
+                  <div className="hidden items-center gap-2 sm:flex">
+                    {visiblePageNumbers.map((pageNumber) => (
+                      <PaginationButton
+                        key={pageNumber}
+                        onClick={() => setCurrentProjectPage(pageNumber)}
+                        isActive={currentProjectPage === pageNumber}
+                      >
+                        {pageNumber}
+                      </PaginationButton>
+                    ))}
+                  </div>
+
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 sm:hidden">
+                    {currentProjectPage} / {totalProjectPages}
+                  </div>
+
+                  <PaginationButton
+                    onClick={() => setCurrentProjectPage((prev) => Math.min(prev + 1, totalProjectPages))}
+                    disabled={currentProjectPage === totalProjectPages}
+                  >
+                    Next
+                  </PaginationButton>
+                </div>
               </div>
             )}
           </TabPanel>
 
-          {/* // Menampilkan sertifikat di tab */}
-        
           <TabPanel value={value} index={1} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-4">
-                {staticCertificates.map((certificate, index) => (
+            <div className="container mx-auto flex items-center justify-center overflow-hidden">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+                {displayedCertificates.map((certificate, index) => (
                   <div
-                    key={index}
+                    key={certificate.id}
                     data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
                     data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
                   >
@@ -422,8 +396,8 @@ export default function FullWidthTabs() {
                 ))}
               </div>
             </div>
-            {certificates.length > initialItems && (
-              <div className="mt-6 w-full flex justify-start">
+            {portfolioCertificates.length > initialItems && (
+              <div className="mt-6 flex w-full justify-start">
                 <ToggleButton
                   onClick={() => toggleShowMore('certificates')}
                   isShowingMore={showAllCertificates}
@@ -433,9 +407,9 @@ export default function FullWidthTabs() {
           </TabPanel>
 
           <TabPanel value={value} index={2} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
-                {techStacks.map((stack, index) => (
+            <div className="container mx-auto flex items-center justify-center overflow-hidden pb-[5%]">
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 xl:gap-6">
+                {portfolioTechStacks.map((stack, index) => (
                   <div
                     key={index}
                     data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}

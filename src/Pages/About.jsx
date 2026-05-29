@@ -2,6 +2,7 @@ import React, { useEffect, memo, useMemo } from "react";
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { portfolioCertificates, portfolioProjects } from "../data/portfolioData";
 
 // Memoized Components
 const Header = memo(() => (
@@ -37,7 +38,12 @@ const ProfileImage = memo(() => (
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 z-10 transition-opacity duration-700 group-hover:opacity-0 hidden sm:block" />
           <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 via-transparent to-blue-500/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 hidden sm:block" />
 
-          <img src="/img-profile.png" alt="Profile" className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-2" loading="lazy" />
+          <img
+            src="/img-profile.png"
+            alt="Profile"
+            className="h-full w-full object-cover object-[center_5%] transition-all duration-700 group-hover:scale-110 group-hover:rotate-2 sm:object-[center_10%]"
+            loading="lazy"
+          />
 
           {/* Advanced hover effects - desktop only */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 z-20 hidden sm:block">
@@ -83,16 +89,13 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 const AboutPage = () => {
   // Memoized calculations
   const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
-    const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
-
     const startDate = new Date("2021-11-06");
     const today = new Date();
     const experience = today.getFullYear() - startDate.getFullYear() - (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
 
     return {
-      totalProjects: storedProjects.length,
-      totalCertificates: storedCertificates.length,
+      totalProjects: portfolioProjects.length,
+      totalCertificates: portfolioCertificates.length,
       YearExperience: experience,
     };
   }, []);
@@ -173,7 +176,7 @@ const AboutPage = () => {
             </p>
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
-              <a href="/cv-haikal.pdf" download="/cv-haikal.pdf" className="w-full">
+              <a href="/CV-MUHAMAD-HAIKAL-APRIANSYAH.pdf" download="/CV-MUHAMAD-HAIKAL-APRIANSYAH.pdf" className="w-full">
                 <button
                   data-aos="fade-up"
                   data-aos-duration="800"

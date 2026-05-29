@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./index.css";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
@@ -10,6 +10,7 @@ import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
 import { AnimatePresence } from 'framer-motion';
+import { syncPortfolioStorage } from "./data/portfolioData";
 
 const LandingPage = ({ showWelcome, setShowWelcome }) => {
   return (
@@ -66,6 +67,10 @@ const ProjectPageLayout = () => (
 
 function App() {
   const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    syncPortfolioStorage();
+  }, []);
 
   return (
     <BrowserRouter>

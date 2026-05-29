@@ -112,10 +112,10 @@ const ContactPage = () => {
       </div>
 
       <div
-        className="h-auto py-10 flex items-center justify-center px-[5%] md:px-0"
+        className="flex h-auto items-center justify-center px-[5%] py-10 lg:px-[10%]"
         id="Contact"
       >
-        <div className="container px-[1%] grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-[45%_55%] 2xl:grid-cols-[35%_65%] gap-12">
+        <div className="container grid grid-cols-1 gap-8 px-[1%] xl:grid-cols-[42%_58%] 2xl:grid-cols-[38%_62%]">
           <div
             data-aos="fade-right"
             data-aos-duration="1200"
@@ -123,10 +123,10 @@ const ContactPage = () => {
           >
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h2 className="text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
+                <h2 className="mb-3 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7] sm:text-4xl">
                   Get in Touch
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-sm text-gray-400 sm:text-base">
                   Have something to discuss? Send me a message and let's talk.
                 </p>
               </div>

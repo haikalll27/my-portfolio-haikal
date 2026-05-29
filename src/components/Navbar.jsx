@@ -50,6 +50,10 @@ const Navbar = () => {
         } else {
             document.body.style.overflow = 'unset';
         }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [isOpen]);
 
     const scrollToSection = (e, href) => {
@@ -139,15 +143,14 @@ const Navbar = () => {
     
         {/* Mobile Menu Overlay */}
         <div
-            className={`md:hidden h-2/5 fixed inset-0 bg-[#030014] transition-all duration-300 ease-in-out ${
+            className={`fixed inset-x-0 bottom-0 top-16 bg-[#030014] transition-all duration-300 ease-in-out md:hidden ${
                 isOpen
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-[-100%] pointer-events-none"
             }`}
-            style={{ top: "64px" }}
         >
             <div className="flex flex-col h-full">
-                <div className="px-4 py-6 space-y-4 flex-1 ">
+                <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
                     {navItems.map((item, index) => (
                         <a
                             key={item.label}
