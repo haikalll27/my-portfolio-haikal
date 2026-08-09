@@ -37,7 +37,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 101,
     Icon: "cms",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "CMS — National Bank",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2026 — Present",
@@ -54,7 +54,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 102,
     Icon: "lms",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "Learning Management System — University",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2026 — Present",
@@ -104,7 +104,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 105,
     Icon: "meeting",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "Smart Meeting Room — Mining Company",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2026 — Present",
@@ -152,7 +152,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 108,
     Icon: "cms",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "CMS Digital Poster — National News Agency",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2025 — Present",
@@ -184,7 +184,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 110,
     Icon: "attendance",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "Attendance System — State Bank (Junio Smart)",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2025",
@@ -200,7 +200,7 @@ export const portfolioProjects = [
   createEnterpriseProject({
     id: 111,
     Icon: "visitor",
-    Title: "Frontend Developer",
+    Title: "Full Stack Developer",
     Name: "Visitor Tracker",
     Company: "PT Sentuh Digital Teknologi",
     Period: "2025",
