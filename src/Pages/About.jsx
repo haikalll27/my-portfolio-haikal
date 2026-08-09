@@ -1,26 +1,32 @@
 import React, { useEffect, memo, useMemo } from "react";
-import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react";
+import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { portfolioCertificates, portfolioProjects } from "../data/portfolioData";
+import { useLanguage } from "../context/LanguageContext";
 
 // Memoized Components
-const Header = memo(() => (
-  <div className="text-center lg:mb-8 mb-2 px-[5%]">
-    <div className="inline-block relative group">
-      <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]" data-aos="zoom-in-up" data-aos-duration="600">
-        About Me
-      </h2>
+const Header = memo(() => {
+  const { t } = useLanguage();
+  return (
+    <div className="text-center lg:mb-8 mb-2 px-[5%]">
+      <div className="inline-block relative group">
+        <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]" data-aos="zoom-in-up" data-aos-duration="600">
+          {t("about.title")}
+        </h2>
+      </div>
+      <p className="mt-2 text-gray-400 max-w-2xl mx-auto text-base sm:text-lg flex items-center justify-center gap-2" data-aos="zoom-in-up" data-aos-duration="800">
+        <Sparkles className="w-5 h-5 text-purple-400" />
+        {t("about.subtitle")}
+        <Sparkles className="w-5 h-5 text-purple-400" />
+      </p>
     </div>
-    <p className="mt-2 text-gray-400 max-w-2xl mx-auto text-base sm:text-lg flex items-center justify-center gap-2" data-aos="zoom-in-up" data-aos-duration="800">
-      <Sparkles className="w-5 h-5 text-purple-400" />
-      Transforming ideas into digital experiences
-      <Sparkles className="w-5 h-5 text-purple-400" />
-    </p>
-  </div>
-));
+  );
+});
 
-const ProfileImage = memo(() => (
+const ProfileImage = memo(() => {
+  const { t } = useLanguage();
+  return (
   <div className="flex justify-end items-center sm:p-12 sm:py-0 sm:pb-0 p-0 py-2 pb-2">
     <div className="relative group" data-aos="fade-up" data-aos-duration="1000">
       {/* Optimized gradient backgrounds with reduced complexity for mobile */}
@@ -40,7 +46,7 @@ const ProfileImage = memo(() => (
 
           <img
             src="/img-profile.png"
-            alt="Profile"
+            alt={t("about.profileAlt")}
             className="h-full w-full object-cover object-[center_5%] transition-all duration-700 group-hover:scale-110 group-hover:rotate-2 sm:object-[center_10%]"
             loading="lazy"
           />
@@ -55,7 +61,8 @@ const ProfileImage = memo(() => (
       </div>
     </div>
   </div>
-));
+  );
+});
 
 const StatCard = memo(({ icon: Icon, color, value, label, description, animation }) => (
   <div data-aos={animation} data-aos-duration={1300} className="relative group">
@@ -87,18 +94,18 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 ));
 
 const AboutPage = () => {
-  // Memoized calculations
-  const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
-    const startDate = new Date("2021-11-06");
-    const today = new Date();
-    const experience = today.getFullYear() - startDate.getFullYear() - (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
+  const { t } = useLanguage();
+  // Stated on the CV as "over 3 years" rather than derived from a start date —
+  // a computed value silently inflates itself every January.
+  const YEARS_OF_EXPERIENCE = "3+";
 
-    return {
+  const { totalProjects, totalCertificates } = useMemo(
+    () => ({
       totalProjects: portfolioProjects.length,
       totalCertificates: portfolioCertificates.length,
-      YearExperience: experience,
-    };
-  }, []);
+    }),
+    []
+  );
 
   // Optimized AOS initialization
   useEffect(() => {
@@ -128,31 +135,34 @@ const AboutPage = () => {
   const statsData = useMemo(
     () => [
       {
+        id: "projects",
         icon: Code,
         color: "from-[#6366f1] to-[#a855f7]",
         value: totalProjects,
-        label: "Total Projects",
-        description: "Innovative web solutions crafted",
+        label: t("about.stats.projectsLabel"),
+        description: t("about.stats.projectsDesc"),
         animation: "fade-right",
       },
       {
+        id: "certificates",
         icon: Award,
         color: "from-[#a855f7] to-[#6366f1]",
         value: totalCertificates,
-        label: "Certificates",
-        description: "Professional skills validated",
+        label: t("about.stats.certificatesLabel"),
+        description: t("about.stats.certificatesDesc"),
         animation: "fade-up",
       },
       {
+        id: "experience",
         icon: Globe,
         color: "from-[#6366f1] to-[#a855f7]",
-        value: YearExperience,
-        label: "Years of Experience",
-        description: "Continuous learning journey",
+        value: YEARS_OF_EXPERIENCE,
+        label: t("about.stats.experienceLabel"),
+        description: t("about.stats.experienceDesc"),
         animation: "fade-left",
       },
     ],
-    [totalProjects, totalCertificates, YearExperience]
+    [totalProjects, totalCertificates, YEARS_OF_EXPERIENCE, t]
   );
 
   return (
@@ -163,16 +173,14 @@ const AboutPage = () => {
         <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="space-y-6 text-center lg:text-left">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold" data-aos="fade-right" data-aos-duration="1000">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">Hello, I'm</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">{t("about.greeting")}</span>
               <span className="block mt-2 text-gray-200" data-aos="fade-right" data-aos-duration="1300">
                 Muhamad Haikal Apriansyah
               </span>
             </h2>
 
             <p className="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed text-justify pb-4 sm:pb-0" data-aos="fade-right" data-aos-duration="1500">
-              I'am a graduate of SMK Adi Sanggoro Bogor, majoring in Software Engineering (RPL). I am an enthusiastic, dedicated, and passionate Full Stack Developer looking for an internship opportunity to apply and develop my technical
-              skills. With a strong academic foundation in software engineering and hands-on experience in various programming languages, I am eager to contribute to innovative projects and learn from experienced professionals in the
-              industry. I am a fast learner who is always up for a challenge.
+              {t("about.bio")}
             </p>
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
@@ -182,7 +190,7 @@ const AboutPage = () => {
                   data-aos-duration="800"
                   className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 shadow-lg hover:shadow-xl animate-bounce-slow"
                 >
-                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> Download CV
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> {t("about.downloadCV")}
                 </button>
               </a>
               <a href="#Portofolio" className="w-full">
@@ -191,7 +199,7 @@ const AboutPage = () => {
                   data-aos-duration="1000"
                   className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 rounded-lg border border-[#a855f7]/50 text-[#a855f7] font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 hover:bg-[#a855f7]/10 animate-bounce-slow delay-200"
                 >
-                  <Code className="w-4 h-4 sm:w-5 sm:h-5" /> View Projects
+                  <Code className="w-4 h-4 sm:w-5 sm:h-5" /> {t("about.viewProjects")}
                 </button>
               </a>
             </div>
@@ -202,38 +210,13 @@ const AboutPage = () => {
 
         <a href="#Portofolio">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 cursor-pointer">
-            {statsData.map((stat) => (
-              <StatCard key={stat.label} {...stat} />
+            {statsData.map(({ id, ...stat }) => (
+              <StatCard key={id} {...stat} />
             ))}
           </div>
         </a>
       </div>
 
-      <style jsx="true">{`
-        @keyframes float {
-        0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-        @keyframes spin-slower {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .animate-bounce-slow {
-          animation: bounce 3s infinite;
-        }
-        .animate-pulse-slow {
-          animation: pulse 3s infinite;
-        }
-        .animate-spin-slower {
-          animation: spin-slower 8s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,33 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Github, Globe, User } from 'lucide-react';
+import { Code2, Github, User } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-
-const TypewriterEffect = ({ text }) => {
-  const [displayText, setDisplayText] = useState('');
-  
-  useEffect(() => {
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index <= text.length) {
-        setDisplayText(text.slice(0, index));
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, 260);
-    
-    return () => clearInterval(timer);
-  }, [text]);
-
-  return (
-    <span className="inline-block">
-      {displayText}
-      <span className="animate-pulse">|</span>
-    </span>
-  );
-};
 
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden">

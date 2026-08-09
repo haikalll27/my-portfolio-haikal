@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft, ExternalLink, Github, Code2, Star,
-  ChevronRight, Layers, Layout, Globe, Package, Cpu, Code,
+  ChevronRight, Layers, Layout, Globe, Package, Cpu, Code, Lock,
 } from "lucide-react";
 import Swal from 'sweetalert2';
 import { portfolioProjects } from "../data/portfolioData";
+import { useLanguage } from "../context/LanguageContext";
+import { ENTERPRISE_ICONS } from "./EnterpriseIcon.js";
 
 const TECH_ICONS = {
   React: Globe,
@@ -48,7 +50,7 @@ const FeatureItem = ({ feature }) => {
   );
 };
 
-const ProjectStats = ({ project }) => {
+const ProjectStats = ({ project, t }) => {
   const techStackCount = project?.TechStack?.length || 0;
   const featuresCount = project?.Features?.length || 0;
 
@@ -62,7 +64,7 @@ const ProjectStats = ({ project }) => {
         </div>
         <div className="flex-grow">
           <div className="text-lg md:text-xl font-semibold text-blue-200">{techStackCount}</div>
-          <div className="text-[10px] md:text-xs text-gray-400">Total Teknologi</div>
+          <div className="text-[10px] md:text-xs text-gray-400">{t("project.totalTech")}</div>
         </div>
       </div>
 
@@ -72,20 +74,20 @@ const ProjectStats = ({ project }) => {
         </div>
         <div className="flex-grow">
           <div className="text-lg md:text-xl font-semibold text-purple-200">{featuresCount}</div>
-          <div className="text-[10px] md:text-xs text-gray-400">Fitur Utama</div>
+          <div className="text-[10px] md:text-xs text-gray-400">{t("project.totalFeatures")}</div>
         </div>
       </div>
     </div>
   );
 };
 
-const handleGithubClick = (githubLink) => {
+const handleGithubClick = (githubLink, t) => {
   if (githubLink === 'Private') {
     Swal.fire({
       icon: 'info',
-      title: 'Source Code Private',
-      text: 'Maaf, source code untuk proyek ini bersifat privat.',
-      confirmButtonText: 'Mengerti',
+      title: t("project.privateTitle"),
+      text: t("project.privateBody"),
+      confirmButtonText: t("project.privateConfirm"),
       confirmButtonColor: '#3085d6',
       background: '#030014',
       color: '#ffffff'
@@ -98,29 +100,54 @@ const handleGithubClick = (githubLink) => {
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [project, setProject] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     const selectedProject = portfolioProjects.find((item) => String(item.id) === id);
-    
+
     if (selectedProject) {
-      const enhancedProject = {
+      setProject({
         ...selectedProject,
         Features: selectedProject.Features || [],
         TechStack: selectedProject.TechStack || [],
         Github: selectedProject.Github || 'https://github.com/haikalll27',
-      };
-      setProject(enhancedProject);
+      });
+      setNotFound(false);
+    } else {
+      // Without this branch an unknown id spins the loader forever, so a broken
+      // shared link looks like a hung site.
+      setProject(null);
+      setNotFound(true);
     }
   }, [id]);
+
+  if (notFound) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#030014] px-[5%]">
+        <div className="max-w-md space-y-5 text-center">
+          <h2 className="text-2xl font-bold text-white md:text-3xl">{t("project.notFoundTitle")}</h2>
+          <p className="text-sm text-gray-400">{t("project.notFoundBody")}</p>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/90 backdrop-blur-xl transition-colors duration-300 hover:bg-white/10"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t("notFound.backHome")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
       <div className="min-h-screen bg-[#030014] flex items-center justify-center">
         <div className="text-center space-y-6 animate-fadeIn">
           <div className="w-16 h-16 md:w-24 md:h-24 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-          <h2 className="text-xl md:text-3xl font-bold text-white">Loading Project...</h2>
+          <h2 className="text-xl md:text-3xl font-bold text-white">{t("project.loading")}</h2>
         </div>
       </div>
     );
@@ -146,10 +173,10 @@ const ProjectDetails = () => {
               className="group inline-flex items-center space-x-1.5 md:space-x-2 px-3 md:px-5 py-2 md:py-2.5 bg-white/5 backdrop-blur-xl rounded-xl text-white/90 hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20 text-sm md:text-base"
             >
               <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Back</span>
+              <span>{t("project.back")}</span>
             </button>
             <div className="flex items-center space-x-1 md:space-x-2 text-sm md:text-base text-white/50">
-              <span>Projects</span>
+              <span>{t("project.breadcrumbProjects")}</span>
               <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
               <span className="text-white/90 truncate">{project.Title}</span>
             </div>
@@ -173,38 +200,45 @@ const ProjectDetails = () => {
                 </p>
               </div>
 
-              <ProjectStats project={project} />
+              <ProjectStats project={project} t={t} />
 
               <div className="flex flex-wrap gap-3 md:gap-4">
                 {/* Action buttons */}
-                <a
-                  href={project.Link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative inline-flex items-center space-x-1.5 md:space-x-2 px-4 md:px-8 py-2.5 md:py-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 hover:from-blue-600/20 hover:to-purple-600/20 text-blue-300 rounded-xl transition-all duration-300 border border-blue-500/20 hover:border-blue-500/40 backdrop-blur-xl overflow-hidden text-sm md:text-base"
-                >
-                  <div className="absolute inset-0 translate-y-[100%] bg-gradient-to-r from-blue-600/10 to-purple-600/10 transition-transform duration-300 group-hover:translate-y-[0%]" />
-                  <ExternalLink className="relative w-4 h-4 md:w-5 md:h-5 group-hover:rotate-12 transition-transform" />
-                  <span className="relative font-medium">Live Demo</span>
-                </a>
+                {project.Link ? (
+                  <a
+                    href={project.Link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative inline-flex items-center space-x-1.5 md:space-x-2 px-4 md:px-8 py-2.5 md:py-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 hover:from-blue-600/20 hover:to-purple-600/20 text-blue-300 rounded-xl transition-all duration-300 border border-blue-500/20 hover:border-blue-500/40 backdrop-blur-xl overflow-hidden text-sm md:text-base"
+                  >
+                    <div className="absolute inset-0 translate-y-[100%] bg-gradient-to-r from-blue-600/10 to-purple-600/10 transition-transform duration-300 group-hover:translate-y-[0%]" />
+                    <ExternalLink className="relative w-4 h-4 md:w-5 md:h-5 group-hover:rotate-12 transition-transform" />
+                    <span className="relative font-medium">{t("project.liveDemo")}</span>
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-gray-400 backdrop-blur-xl md:px-8 md:py-4 md:text-base">
+                    <Lock className="h-4 w-4 md:h-5 md:w-5" />
+                    <span className="font-medium">{t("project.internalNote")}</span>
+                  </span>
+                )}
 
                 <a
                   href={project.Github}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative inline-flex items-center space-x-1.5 md:space-x-2 px-4 md:px-8 py-2.5 md:py-4 bg-gradient-to-r from-purple-600/10 to-pink-600/10 hover:from-purple-600/20 hover:to-pink-600/20 text-purple-300 rounded-xl transition-all duration-300 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-xl overflow-hidden text-sm md:text-base"
-                  onClick={(e) => !handleGithubClick(project.Github) && e.preventDefault()}
+                  onClick={(e) => !handleGithubClick(project.Github, t) && e.preventDefault()}
                 >
                   <div className="absolute inset-0 translate-y-[100%] bg-gradient-to-r from-purple-600/10 to-pink-600/10 transition-transform duration-300 group-hover:translate-y-[0%]" />
                   <Github className="relative w-4 h-4 md:w-5 md:h-5 group-hover:rotate-12 transition-transform" />
-                  <span className="relative font-medium">Github</span>
+                  <span className="relative font-medium">{t("project.github")}</span>
                 </a>
               </div>
 
               <div className="space-y-4 md:space-y-6">
                 <h3 className="text-lg md:text-xl font-semibold text-white/90 mt-[3rem] md:mt-0 flex items-center gap-2 md:gap-3">
                   <Code2 className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
-                  Technologies Used
+                  {t("project.technologiesUsed")}
                 </h3>
                 {project.TechStack.length > 0 ? (
                   <div className="flex flex-wrap gap-2 md:gap-3">
@@ -213,28 +247,37 @@ const ProjectDetails = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm md:text-base text-gray-400 opacity-50">No technologies added.</p>
+                  <p className="text-sm md:text-base text-gray-400 opacity-50">{t("project.noTechnologies")}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-6 md:space-y-10 animate-slideInRight">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
-              
-                <div className="absolute inset-0 bg-gradient-to-t from-[#030014] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img
-                  src={project.Img}
-                  alt={project.Title}
-                  className="w-full  object-cover transform transition-transform duration-700 will-change-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 border-2 border-white/0 group-hover:border-white/10 transition-colors duration-300 rounded-2xl" />
-              </div>
+              {project.Img ? (
+                <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#030014] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img
+                    src={project.Img}
+                    alt={t("project.screenshotAlt", { title: project.Title })}
+                    loading="lazy"
+                    className="w-full  object-cover transform transition-transform duration-700 will-change-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 border-2 border-white/0 group-hover:border-white/10 transition-colors duration-300 rounded-2xl" />
+                </div>
+              ) : (
+                <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#6366f1]/20 via-[#0a0a1a] to-[#a855f7]/20 shadow-2xl">
+                  {(() => {
+                    const HeroIcon = ENTERPRISE_ICONS[project.Icon] || ENTERPRISE_ICONS.default;
+                    return <HeroIcon className="h-20 w-20 text-white/80 md:h-28 md:w-28" strokeWidth={1.25} />;
+                  })()}
+                </div>
+              )}
 
               {/* Fitur Utama */}
               <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl p-8 border border-white/10 space-y-6 hover:border-white/20 transition-colors duration-300 group">
                 <h3 className="text-xl font-semibold text-white/90 flex items-center gap-3">
                   <Star className="w-5 h-5 text-yellow-400 group-hover:rotate-[20deg] transition-transform duration-300" />
-                  Key Features
+                  {t("project.keyFeatures")}
                 </h3>
                 {project.Features.length > 0 ? (
                   <ul className="list-none space-y-2">
@@ -243,7 +286,7 @@ const ProjectDetails = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-400 opacity-50">No features added.</p>
+                  <p className="text-gray-400 opacity-50">{t("project.noFeatures")}</p>
                 )}
               </div>
             </div>
@@ -251,68 +294,6 @@ const ProjectDetails = () => {
         </div>
       </div>
 
-      <style jsx="true">{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 10s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.7s ease-out;
-        }
-        .animate-slideInLeft {
-          animation: slideInLeft 0.7s ease-out;
-        }
-        .animate-slideInRight {
-          animation: slideInRight 0.7s ease-out;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,26 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
+
+// Hoisted to module scope: the scroll effect below closes over this with [] deps,
+// so it must keep a stable identity once labels become translated at render time.
+const NAV_ITEMS = [
+    { id: "Home", href: "#Home", labelKey: "nav.home" },
+    { id: "About", href: "#About", labelKey: "nav.about" },
+    { id: "Portofolio", href: "#Portofolio", labelKey: "nav.portfolio" },
+    { id: "Experience", href: "#Experience", labelKey: "nav.experience" },
+    { id: "Contact", href: "#Contact", labelKey: "nav.contact" },
+];
 
 const Navbar = () => {
+    const { t } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("Home");
-    
-    const navItems = [
-        { href: "#Home", label: "Home" },
-        { href: "#About", label: "About" },
-        { href: "#Portofolio", label: "Portofolio" },
-        { href: "#Contact", label: "Contact" },
-    ];
 
     useEffect(() => {
-        const handleScroll = () => {
+        let frame = null;
+
+        const measure = () => {
+            frame = null;
             setScrolled(window.scrollY > 20);
-            const sections = navItems.map(item => {
+            const sections = NAV_ITEMS.map(item => {
                 const section = document.querySelector(item.href);
                 if (section) {
                     return {
-                        id: item.href.replace("#", ""),
+                        id: item.id,
                         offset: section.offsetTop - 550,
                         height: section.offsetHeight
                     };
@@ -28,9 +37,20 @@ const Navbar = () => {
                 return null;
             }).filter(Boolean);
 
+            // A nav item whose section is missing is dropped silently by filter(Boolean),
+            // which is what keeps this safe on the /project/:id route. On the landing page
+            // it would instead hide a typo'd id, so surface that during development.
+            if (import.meta.env.DEV && sections.length > 0 && sections.length !== NAV_ITEMS.length) {
+                const missing = NAV_ITEMS.filter(item => !document.querySelector(item.href));
+                console.warn(
+                    `Navbar: no section found for ${missing.map(item => item.href).join(", ")}. ` +
+                    `These links will render but do nothing.`
+                );
+            }
+
             const currentPosition = window.scrollY;
-            const active = sections.find(section => 
-                currentPosition >= section.offset && 
+            const active = sections.find(section =>
+                currentPosition >= section.offset &&
                 currentPosition < section.offset + section.height
             );
 
@@ -39,9 +59,19 @@ const Navbar = () => {
             }
         };
 
-        window.addEventListener("scroll", handleScroll);
-        handleScroll();
-        return () => window.removeEventListener("scroll", handleScroll);
+        // Coalesce bursts of scroll events into one measurement per frame.
+        const handleScroll = () => {
+            if (frame === null) {
+                frame = requestAnimationFrame(measure);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        measure();
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            if (frame !== null) cancelAnimationFrame(frame);
+        };
     }, []);
 
     useEffect(() => {
@@ -94,39 +124,43 @@ const Navbar = () => {
     
                 {/* Desktop Navigation */}
                 <div className="hidden md:block">
-                    <div className="ml-8 flex items-center space-x-8">
-                        {navItems.map((item) => (
+                    <div className="ml-8 flex items-center space-x-6 lg:space-x-8">
+                        {NAV_ITEMS.map((item) => (
                             <a
-                                key={item.label}
+                                key={item.id}
                                 href={item.href}
                                 onClick={(e) => scrollToSection(e, item.href)}
                                 className="group relative px-1 py-2 text-sm font-medium"
                             >
                                 <span
                                     className={`relative z-10 transition-colors duration-300 ${
-                                        activeSection === item.href.substring(1)
+                                        activeSection === item.id
                                             ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
                                             : "text-[#e2d3fd] group-hover:text-white"
                                     }`}
                                 >
-                                    {item.label}
+                                    {t(item.labelKey)}
                                 </span>
                                 <span
                                     className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] transform origin-left transition-transform duration-300 ${
-                                        activeSection === item.href.substring(1)
+                                        activeSection === item.id
                                             ? "scale-x-100"
                                             : "scale-x-0 group-hover:scale-x-100"
                                     }`}
                                 />
                             </a>
                         ))}
+                        <LanguageSwitcher />
                     </div>
                 </div>
-    
+
                 {/* Mobile Menu Button */}
-                <div className="md:hidden">
+                <div className="flex items-center gap-3 md:hidden">
+                    <LanguageSwitcher />
                     <button
                         onClick={() => setIsOpen(!isOpen)}
+                        aria-label={isOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+                        aria-expanded={isOpen}
                         className={`relative p-2 text-[#e2d3fd] hover:text-white transition-transform duration-300 ease-in-out transform ${
                             isOpen ? "rotate-90 scale-125" : "rotate-0 scale-100"
                         }`}
@@ -151,13 +185,13 @@ const Navbar = () => {
         >
             <div className="flex flex-col h-full">
                 <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
-                    {navItems.map((item, index) => (
+                    {NAV_ITEMS.map((item, index) => (
                         <a
-                            key={item.label}
+                            key={item.id}
                             href={item.href}
                             onClick={(e) => scrollToSection(e, item.href)}
                             className={`block px-4 py-3 text-lg font-medium transition-all duration-300 ease ${
-                                activeSection === item.href.substring(1)
+                                activeSection === item.id
                                     ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
                                     : "text-[#e2d3fd] hover:text-white"
                             }`}
@@ -167,7 +201,7 @@ const Navbar = () => {
                                 opacity: isOpen ? 1 : 0,
                             }}
                         >
-                            {item.label}
+                            {t(item.labelKey)}
                         </a>
                     ))}
                 </div>

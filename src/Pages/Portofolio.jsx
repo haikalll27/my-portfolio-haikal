@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
@@ -16,11 +15,11 @@ import {
   portfolioCertificates,
   portfolioProjects,
   portfolioTechStacks,
-  syncPortfolioStorage,
 } from "../data/portfolioData";
+import { useLanguage } from "../context/LanguageContext";
 
 // Separate ShowMore/ShowLess button component
-const ToggleButton = ({ onClick, isShowingMore }) => (
+const ToggleButton = ({ onClick, isShowingMore, label }) => (
   <button
     onClick={onClick}
     className="
@@ -48,7 +47,7 @@ const ToggleButton = ({ onClick, isShowingMore }) => (
     "
   >
     <div className="relative z-10 flex items-center gap-2">
-      {isShowingMore ? "Lihat Lebih Sedikit" : "Lihat Lebih Banyak"}
+      {label}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -68,12 +67,9 @@ const ToggleButton = ({ onClick, isShowingMore }) => (
   </button>
 );
 
-const CountLabel = ({ label, count }) => (
+const CountLabel = ({ label }) => (
   <span className="flex items-center gap-2">
     <span>{label}</span>
-    {/* <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-xs text-slate-200">
-      {count}
-    </span> */}
   </span>
 );
 
@@ -108,12 +104,6 @@ function TabPanel({ children, value, index, ...other }) {
   );
 }
 
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
 function a11yProps(index) {
   return {
     id: `full-width-tab-${index}`,
@@ -123,6 +113,7 @@ function a11yProps(index) {
 
 export default function FullWidthTabs() {
   const theme = useTheme();
+  const { t } = useLanguage();
   const [value, setValue] = useState(0);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [currentProjectPage, setCurrentProjectPage] = useState(1);
@@ -139,7 +130,6 @@ export default function FullWidthTabs() {
   }, [screenWidth]);
 
   useEffect(() => {
-    syncPortfolioStorage();
     AOS.init({
       once: false,
     });
@@ -214,22 +204,21 @@ export default function FullWidthTabs() {
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Portfolio Showcase
+            {t("portfolio.title")}
           </span>
         </div>
         <div className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Explore my journey through projects, certifications, and technical expertise.
-          Each section represents a milestone in my continuous learning path.
+          {t("portfolio.subtitle")}
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-slate-300">
           <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-            {portfolioProjects.length} Projects
+            {portfolioProjects.length} {t("portfolio.countProjects")}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-            {portfolioCertificates.length} Certificates
+            {portfolioCertificates.length} {t("portfolio.countCertificates")}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-            {portfolioTechStacks.length} Tech Stack
+            {portfolioTechStacks.length} {t("portfolio.countTechStack")}
           </span>
         </div>
       </div>
@@ -311,17 +300,17 @@ export default function FullWidthTabs() {
           >
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label={<CountLabel label="Projects" count={portfolioProjects.length} />}
+              label={<CountLabel label={t("portfolio.tabProjects")} />}
               {...a11yProps(0)}
             />
             <Tab
               icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label={<CountLabel label="Certificates" count={portfolioCertificates.length} />}
+              label={<CountLabel label={t("portfolio.tabCertificates")} />}
               {...a11yProps(1)}
             />
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label={<CountLabel label="Tech Stack" count={portfolioTechStacks.length} />}
+              label={<CountLabel label={t("portfolio.tabTechStack")} />}
               {...a11yProps(2)}
             />
           </Tabs>
@@ -337,7 +326,7 @@ export default function FullWidthTabs() {
               <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
                   {displayedProjects.map((project, index) => (
                     <div className="h-full rounded-lg overflow-hidden" key={project.id} data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"} data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}>
-                      <CardProject Img={project.Img} Title={project.Title} Name={project.Name} Description={project.Description} Link={project.Link} id={project.id} />
+                      <CardProject {...project} />
                     </div>
                   ))}
               </div>
@@ -345,14 +334,14 @@ export default function FullWidthTabs() {
             {totalProjectPages > 1 && (
               <div className="mt-8 flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:justify-between">
                 <div className="text-center text-sm text-slate-400 sm:text-left">
-                  Menampilkan {displayedProjects.length} dari {portfolioProjects.length} project
+                  {t("portfolio.showing", { shown: displayedProjects.length, total: portfolioProjects.length })}
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <PaginationButton
                     onClick={() => setCurrentProjectPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentProjectPage === 1}
                   >
-                    Prev
+                    {t("portfolio.prev")}
                   </PaginationButton>
 
                   <div className="hidden items-center gap-2 sm:flex">
@@ -375,7 +364,7 @@ export default function FullWidthTabs() {
                     onClick={() => setCurrentProjectPage((prev) => Math.min(prev + 1, totalProjectPages))}
                     disabled={currentProjectPage === totalProjectPages}
                   >
-                    Next
+                    {t("portfolio.next")}
                   </PaginationButton>
                 </div>
               </div>
@@ -401,6 +390,7 @@ export default function FullWidthTabs() {
                 <ToggleButton
                   onClick={() => toggleShowMore('certificates')}
                   isShowingMore={showAllCertificates}
+                  label={showAllCertificates ? t("portfolio.showLess") : t("portfolio.showMore")}
                 />
               </div>
             )}

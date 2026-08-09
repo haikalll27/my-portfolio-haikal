@@ -1,48 +1,48 @@
 import React, { useEffect, useRef } from "react"
 
+const INITIAL_POSITIONS = [
+	{ x: -4, y: 0 },
+	{ x: -4, y: 0 },
+	{ x: 20, y: -8 },
+	{ x: 20, y: -8 },
+]
+
 const AnimatedBackground = () => {
 	const blobRefs = useRef([])
-	const initialPositions = [
-		{ x: -4, y: 0 },
-		{ x: -4, y: 0 },
-		{ x: 20, y: -8 },
-		{ x: 20, y: -8 },
-	]
 
 	useEffect(() => {
-		let currentScroll = 0
-		let requestId
-
-		const handleScroll = () => {
-			const newScroll = window.pageYOffset
-			const scrollDelta = newScroll - currentScroll
-			currentScroll = newScroll
-
-			blobRefs.current.forEach((blob, index) => {
-				const initialPos = initialPositions[index]
-
-				// Ensure the blob exists before applying styles
-				if (blob) {
-					// Calculating movement in both X and Y direction
-					const xOffset = Math.sin(newScroll / 100 + index * 0.5) * 340 // Horizontal movement
-					const yOffset = Math.cos(newScroll / 100 + index * 0.5) * 40 // Vertical movement
-
-					const x = initialPos.x + xOffset
-					const y = initialPos.y + yOffset
-
-					// Apply transformation with smooth transition
-					blob.style.transform = `translate(${x}px, ${y}px)`
-					blob.style.transition = "transform 1.4s ease-out"
-				}
-			})
-
-			requestId = requestAnimationFrame(handleScroll)
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			return
 		}
 
-		window.addEventListener("scroll", handleScroll)
+		let requestId = null
+
+		const paint = () => {
+			requestId = null
+			const scroll = window.pageYOffset
+
+			blobRefs.current.forEach((blob, index) => {
+				if (!blob) return
+
+				const initialPos = INITIAL_POSITIONS[index]
+				const xOffset = Math.sin(scroll / 100 + index * 0.5) * 340
+				const yOffset = Math.cos(scroll / 100 + index * 0.5) * 40
+
+				blob.style.transform = `translate(${initialPos.x + xOffset}px, ${initialPos.y + yOffset}px)`
+				blob.style.transition = "transform 1.4s ease-out"
+			})
+		}
+
+		const handleScroll = () => {
+			if (requestId === null) {
+				requestId = requestAnimationFrame(paint)
+			}
+		}
+
+		window.addEventListener("scroll", handleScroll, { passive: true })
 		return () => {
 			window.removeEventListener("scroll", handleScroll)
-			cancelAnimationFrame(requestId)
+			if (requestId !== null) cancelAnimationFrame(requestId)
 		}
 	}, [])
 

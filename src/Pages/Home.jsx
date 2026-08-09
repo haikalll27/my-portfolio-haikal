@@ -3,41 +3,49 @@ import { Github, Linkedin, Mail, ExternalLink, Instagram, Sparkles } from "lucid
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { useLanguage } from "../context/LanguageContext"
 
-// Memoized Components
-const StatusBadge = memo(() => (
-  <div className="mt-4 inline-block animate-float pt-2 sm:mt-2 lg:mx-0 lg:mt-1 lg:pt-1" data-aos="zoom-in" data-aos-delay="400">
-    <div className="relative group">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] rounded-full blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-      <div className="relative px-3 sm:px-4 py-2 rounded-full bg-black/40 backdrop-blur-xl border border-white/10">
-        <span className="bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-transparent bg-clip-text sm:text-sm text-[0.7rem] font-medium flex items-center">
-          <Sparkles className="sm:w-4 sm:h-4 w-3 h-3 mr-2 text-blue-400" />
-          Ready to Innovate
-        </span>
+// These take no props, so memo would otherwise freeze them at the boot language —
+// each subscribes to the context itself to re-render on switch.
+const StatusBadge = memo(() => {
+  const { t } = useLanguage();
+  return (
+    <div className="mt-4 inline-block animate-float pt-2 sm:mt-2 lg:mx-0 lg:mt-1 lg:pt-1" data-aos="zoom-in" data-aos-delay="400">
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] rounded-full blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+        <div className="relative px-3 sm:px-4 py-2 rounded-full bg-black/40 backdrop-blur-xl border border-white/10">
+          <span className="bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-transparent bg-clip-text sm:text-sm text-[0.7rem] font-medium flex items-center">
+            <Sparkles className="sm:w-4 sm:h-4 w-3 h-3 mr-2 text-blue-400" />
+            {t("home.badge")}
+          </span>
+        </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
-const MainTitle = memo(() => (
-  <div className="space-y-2" data-aos="fade-up" data-aos-delay="600">
-    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-bold tracking-tight">
-      <span className="relative inline-block">
-        <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
-        <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-        Full stack
+const MainTitle = memo(() => {
+  const { t } = useLanguage();
+  return (
+    <div className="space-y-2" data-aos="fade-up" data-aos-delay="600">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-bold tracking-tight">
+        <span className="relative inline-block">
+          <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
+          <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
+            {t("home.titleTop")}
+          </span>
         </span>
-      </span>
-      <br />
-      <span className="relative inline-block mt-2">
-        <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
-        <span className="relative bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
-          Developer
+        <br />
+        <span className="relative inline-block mt-2">
+          <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
+          <span className="relative bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
+            {t("home.titleBottom")}
+          </span>
         </span>
-      </span>
-    </h1>
-  </div>
-));
+      </h1>
+    </div>
+  );
+});
 
 const TechStack = memo(({ tech }) => (
   <div className="px-4 py-2 hidden sm:block rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm text-gray-300 hover:bg-white/10 transition-colors">
@@ -45,7 +53,7 @@ const TechStack = memo(({ tech }) => (
   </div>
 ));
 
-const CTAButton = memo(({ href, text, icon: Icon }) => (
+const CTAButton = memo(({ href, text, icon: Icon, iconMotion = "rotate" }) => (
   <a href={href}>
     <button className="group relative w-full sm:w-[160px]">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4f52c9] to-[#8644c5] rounded-xl opacity-50 blur-md group-hover:opacity-90 transition-all duration-700"></div>
@@ -55,7 +63,7 @@ const CTAButton = memo(({ href, text, icon: Icon }) => (
           <span className="bg-gradient-to-r from-gray-200 to-white bg-clip-text text-transparent font-medium z-10">
             {text}
           </span>
-          <Icon className={`w-4 h-4 text-gray-200 ${text === 'Contact' ? 'group-hover:translate-x-1' : 'group-hover:rotate-45'} transform transition-all duration-300 z-10`} />
+          <Icon className={`w-4 h-4 text-gray-200 ${iconMotion === 'slide' ? 'group-hover:translate-x-1' : 'group-hover:rotate-45'} transform transition-all duration-300 z-10`} />
         </span>
       </div>
     </button>
@@ -77,8 +85,7 @@ const SocialLink = memo(({ icon: Icon, link }) => (
 const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
-const WORDS = ["Full Stack Developer", "Digital Technology Enthusiast"];
-const TECH_STACK = ["React", "Next JS", "Vue JS", "Laravel"];
+const TECH_STACK = ["React", "Next JS", "Vue JS", "TypeScript", "Laravel"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/haikalll27" },
   { icon: Linkedin, link: "https://www.linkedin.com/in/haikal-apriansyah-004849291/" },
@@ -86,6 +93,8 @@ const SOCIAL_LINKS = [
 ];
 
 const Home = () => {
+  const { t, tList } = useLanguage()
+  const words = tList("home.roles")
   const [text, setText] = useState("")
   const [isTyping, setIsTyping] = useState(true)
   const [wordIndex, setWordIndex] = useState(0)
@@ -132,11 +141,21 @@ const Home = () => {
     };
   }, [dotLottie]);
 
+  // Restart cleanly when the language changes so the half-typed English word
+  // isn't left stranded in front of the Indonesian list.
+  useEffect(() => {
+    setText("");
+    setCharIndex(0);
+    setWordIndex(0);
+    setIsTyping(true);
+  }, [tList]);
+
   // Optimize typing effect
   const handleTyping = useCallback(() => {
+    const current = words[wordIndex] ?? "";
     if (isTyping) {
-      if (charIndex < WORDS[wordIndex].length) {
-        setText(prev => prev + WORDS[wordIndex][charIndex]);
+      if (charIndex < current.length) {
+        setText(prev => prev + current[charIndex]);
         setCharIndex(prev => prev + 1);
       } else {
         setTimeout(() => setIsTyping(false), PAUSE_DURATION);
@@ -146,11 +165,11 @@ const Home = () => {
         setText(prev => prev.slice(0, -1));
         setCharIndex(prev => prev - 1);
       } else {
-        setWordIndex(prev => (prev + 1) % WORDS.length);
+        setWordIndex(prev => (prev + 1) % words.length);
         setIsTyping(true);
       }
     }
-  }, [charIndex, isTyping, wordIndex]);
+  }, [charIndex, isTyping, wordIndex, words]);
 
   useEffect(() => {
     const timeout = setTimeout(
@@ -203,7 +222,7 @@ const Home = () => {
                 <p className="max-w-2xl text-sm font-light leading-relaxed text-gray-400 sm:text-base md:text-lg"
                   data-aos="fade-up"
                   data-aos-delay="1000">
-                  Full-Stack Web Development from interactive user interface to infrastructure, building modern web applications that are functional, responsive, and user-friendly.
+                  {t("home.description")}
                 </p>
 
                 {/* Tech Stack */}
@@ -215,8 +234,8 @@ const Home = () => {
 
                 {/* CTA Buttons */}
                 <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-start" data-aos="fade-up" data-aos-delay="1400">
-                  <CTAButton href="#Portofolio" text="Projects" icon={ExternalLink} />
-                  <CTAButton href="#Contact" text="Contact" icon={Mail} />
+                  <CTAButton href="#Portofolio" text={t("home.ctaProjects")} icon={ExternalLink} iconMotion="rotate" />
+                  <CTAButton href="#Contact" text={t("home.ctaContact")} icon={Mail} iconMotion="slide" />
                 </div>
 
                 {/* Social Links */}
@@ -246,7 +265,7 @@ const Home = () => {
                   {hasLottieError ? (
                     <img
                       src="/Coding.gif"
-                      alt="Coding animation"
+                      alt={t("home.lottieAlt")}
                       className="h-full w-full object-contain"
                     />
                   ) : (

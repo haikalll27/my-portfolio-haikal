@@ -41,20 +41,8 @@ body {
   }
   
 
-@keyframes blob {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-20px);
-	}
-}
-
-.animate-blob {
-	animation: blob 8s infinite;
-}
-
+/* Animation keyframes live in tailwind.config.js; these delay utilities have no
+   Tailwind equivalent and pair with .animate-blob on the project detail page. */
 .animation-delay-2000 {
 	animation-delay: 2s;
 }
@@ -116,17 +104,6 @@ body {
 
 
 
- @keyframes shine {
-  from {
-	     left: -100%;
-  }
-	  to {
-	    left: 200%;
-	   }
-	 }
-	 .animate-shine {
-   animation: shine 1.5s ease-in-out infinite;
- }
 
   
 /*   @media (prefers-color-scheme: dark) {

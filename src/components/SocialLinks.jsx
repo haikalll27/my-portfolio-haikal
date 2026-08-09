@@ -35,7 +35,7 @@ const socialLinks = [
     displayName: "Tiktok",
     subText: "@haickalap",
     icon: ({ className, ...props }) => (
-      <svg width="24px" height="24px" viewBox="0 0 45 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+      <svg className={className} viewBox="0 0 45 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" {...props}>
         <title>Tiktok</title>
         <g id="Icon/Social/tiktok-color" stroke="none" strokeWidth="8" fill="none" fillRule="evenodd">
           <g id="Group-7" transform="translate(8.000000, 6.000000)">

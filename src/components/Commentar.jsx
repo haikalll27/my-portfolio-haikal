@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { MessageCircle, UserCircle2, Loader2, AlertCircle, Send, ImagePlus, X } from 'lucide-react';
+import { UserCircle2, Loader2, Send, ImagePlus, X, AlertCircle } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-const Comment = memo(({ comment, formatDate, index }) => (
+const Comment = memo(function Comment({ comment, formatDate, index }) {
+    return (
     <div 
         className="px-4 pt-4 pb-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group hover:shadow-lg hover:-translate-y-0.5"
         data-aos="fade-up"
@@ -33,9 +34,10 @@ const Comment = memo(({ comment, formatDate, index }) => (
             </div>
         </div>
     </div>
-));
+    );
+});
 
-const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
+const CommentForm = memo(function CommentForm({ onSubmit, isSubmitting, error }) {
     const [newComment, setNewComment] = useState('');
     const [userName, setUserName] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
@@ -154,6 +156,13 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
                 </div>
             </div>
 
+            {error && (
+                <p role="alert" className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    {error}
+                </p>
+            )}
+
             <button
                 type="submit"
                 disabled={isSubmitting}
@@ -252,7 +261,7 @@ const Komentar = () => {
             setComments((prevComments) => [...prevComments, newCommentData]);
 
             setIsSubmitting(false);
-        } catch (err) {
+        } catch {
             setError('Failed to post comment. Please try again later.');
             setIsSubmitting(false);
         }
